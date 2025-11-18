@@ -19,12 +19,12 @@ if (!CSV_URL) {
     process.exit(1);
 }
 
+// Meta nos pide que encriptemos la info del cliente. Usamos crypto
+const crypto = require('crypto');
+
 //--------3
 
 // HELPERS
-
-// Meta nos pide que encriptemos la info del cliente. Usamos crypto
-const crypto = require('crypto');
 
 // Normalizamos la info como la pide Meta, hash genérico SHA-256 para strings (email, nombre, ciudad, etc.), luego encriptamos
 function sha256(value) {
@@ -33,7 +33,7 @@ function sha256(value) {
     return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 
-// Normalizar teléfono (dejar solo dígitos)
+// Normaliza números de teléfono (deja solo los dígitos)
 function normalizePhone(phone) {
     if (!phone) return null;
     const digits = phone.replace(/[^\d]/g, '');
@@ -168,7 +168,7 @@ function mapRowToEvent(row) {
 
 
 
-//--------4
+//--------5
 
 
 // Función principal
