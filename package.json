@@ -1,0 +1,25 @@
+{
+  "name": "adsmurai-capi-test",
+  "version": "1.0.0",
+  "description": "This repo contains the CAPI test for Adsmurai.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miranda-company/adsmurai-capi-test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/miranda-company/adsmurai-capi-test/issues"
+  },
+  "homepage": "https://github.com/miranda-company/adsmurai-capi-test#readme",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "csv-parse": "^6.1.0",
+    "dotenv": "^17.2.3"
+  }
+}

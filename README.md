@@ -39,3 +39,8 @@ In order for us to review the tool, please send us a repository link from any re
 - Javascript
 - Node.js
 - NPM
+
+**Librerías**
+- axios (for HTTP requests)
+- csv-parse (converts CSV into JS objects)
+- dotenv (read the .env file)
