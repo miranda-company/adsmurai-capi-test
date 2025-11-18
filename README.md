@@ -1,17 +1,17 @@
-# adsmurai-capi-test
- This is the Conversion API test for Adsmurai
+# Adsmurai CApi Test
+This repo contains the CAPI test for Adsmurai.
 
- The goal of this test is to create a tool that pulls data from an CSV file (provided by Adsmurai), format the data to meet META requirements and push the data into Meta obtaining a 200 response code.
+The goal of this test is to create a tool that pulls data from an CSV file (provided by Adsmurai), format the data to meet META requirements and push the data into Meta obtaining a 200 response code.
 
 /--------------------------------------------
 
 ## Author info
 
-**Author:** Rodolfo Miranda Company
-**Date:** 11/18/2025
-**Location:** Barcelona
-**email:** rodolfo@eloquent.es
-**Phone number:** (+34 680 997 021)
+- **Author:** Rodolfo Miranda Company
+- **Date:** 11/18/2025
+- **Location:** Barcelona
+- **email:** rodolfo@eloquent.es
+- **Phone number:** (+34 680 997 021)
 
 /--------------------------------------------
 
@@ -34,8 +34,8 @@ In order for us to review the tool, please send us a repository link from any re
 /--------------------------------------------
 
 ## Tech used
-VS Code
-GitHub
-Javascript
-Node.js
-NPM
+- VS Code
+- GitHub
+- Javascript
+- Node.js
+- NPM
