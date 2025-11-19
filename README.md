@@ -45,3 +45,31 @@ In order for us to review the tool, please send us a repository link from any re
 - csv-parse (converts CSV into JS objects)
 - dotenv (read the .env file)
 - crypto (encrypts data)
+
+/--------------------------------------------
+
+## Setup
+
+1. Clone the repo
+2. Within project folder´s terminal run: npm install
+3. Edit .env file with the following data:
+
+- CSV_URL
+- META_PIXEL_ID
+- META_ACCESS_TOKEN
+- Graph API Version
+
+/--------------------------------------------
+
+## Run
+
+Within project folder´s terminal run: npm start
+
+The script will:
+1. Download the CSV from CSV_URL.
+2. Parse all rows.
+3. Map each row to a Purchase event.
+4. Hash user fields (email, phone, etc.) using SHA-256.
+5. Send the events to Meta Conversions API.
+
+Check console messages for "Status" and errors

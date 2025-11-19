@@ -1,6 +1,6 @@
 //--------1
 
-// Pedimos documento con las variables del proyecto
+// Pedimos documento con las variables del proyecto .env
 require('dotenv').config();
 
 //--------2
@@ -23,6 +23,13 @@ if (!CSV_URL) {
 
 // Meta nos pide que encriptemos la info del cliente. Usamos crypto
 const crypto = require('crypto');
+
+const { META_PIXEL_ID, META_ACCESS_TOKEN, GRAPH_API_VERSION = 'v21.0' } = process.env;
+
+if (!META_PIXEL_ID || !META_ACCESS_TOKEN) {
+    console.error('Faltan META_PIXEL_ID o META_ACCESS_TOKEN en el doc .env');
+    process.exit(1);
+}
 
 //--------3
 
@@ -100,6 +107,26 @@ function splitName(fullName) {
 
     return { firstName, lastName };
 }
+
+// Envía el evento POST a la API de META
+async function sendEvents(eventsBatch) {
+    const endpoint = `https://graph.facebook.com/${GRAPH_API_VERSION}/${META_PIXEL_ID}/events`;
+
+    const payload = {
+        data: eventsBatch
+    };
+
+    const response = await axios.post(endpoint, payload, {
+        params: {
+            access_token: META_ACCESS_TOKEN
+        }
+    });
+
+    console.log('Respuesta de Meta:');
+    console.log('Status:', response.status);
+    console.log('Body:', JSON.stringify(response.data, null, 2));
+}
+
 
 //--------4
 
@@ -252,9 +279,31 @@ async function main() {
         console.log('Evento generado a partir de la primera fila:');
         console.dir(firstEvent, { depth: null });
 
+        ////////////////////////////
+        // Enviamos eventos a META
+        ////////////////////////////
+        const events = records
+            .map(mapRowToEvent)
+            .filter((e) => e !== null);
+
+        console.log(`Eventos generados: ${events.length}`);
+        // De momento, probamos solo con los primeros 10
+        const testBatch = events.slice(0, 10);
+        console.log(`Enviando ${testBatch.length} eventos de prueba a Meta...`);
+
+        await sendEvents(testBatch);
+
+        console.log('Hecho.');
+
+
     } catch (err) {
-        console.error('Error:');
-        console.error(err.message);
+        console.error('Error general:');
+        if (err.response) {
+            console.error('Status:', err.response.status);
+            console.error('Body:', err.response.data);
+        } else {
+            console.error(err.message);
+        }
     }
 }
 
