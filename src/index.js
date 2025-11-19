@@ -5,6 +5,8 @@ require('dotenv').config();
 
 //--------2
 
+// REQUIRES
+
 // Axios es el "fetch" de Node.js
 const axios = require('axios');
 
@@ -57,8 +59,7 @@ function parsePrice(raw) {
 
     let numStr = match[0]; // por ejemplo "15,00" o "1.234,50"
 
-    // 2) Opcional: si usaran puntos para miles, se podrían quitar:
-    //    "1.234,50" -> "1234,50"
+    // 2) Quitar punto en los millares si es que viene dado por ejemplo: "1.234,50" resultado "1234,50"
     numStr = numStr.replace(/\./g, '');
 
     // 3) Cambiar coma decimal por punto: "1234,50" -> "1234.50"
@@ -70,9 +71,39 @@ function parsePrice(raw) {
     return value;
 }
 
+// Procesa el nombre del cliente y lo divide en first name "fn" y lastname "ln"
+function splitName(fullName) {
+    if (!fullName) {
+        return { firstName: null, lastName: null };
+    }
+
+    const parts = fullName
+        .trim()
+        .split(/\s+/) // separa por uno o más espacios
+        .filter(Boolean);
+
+    if (parts.length === 0) {
+        return { firstName: null, lastName: null };
+    }
+
+    if (parts.length === 1) {
+        // Solo un nombre
+        return {
+            firstName: parts[0],
+            lastName: null
+        };
+    }
+
+    // Pasamos la primera parte como nombre, el resto como apellido
+    const firstName = parts[0];
+    const lastName = parts.slice(1).join(' ');
+
+    return { firstName, lastName };
+}
+
 //--------4
 
-// Esta función mapea los datos de las filas y las convierte a un evento tal y como espera Meta
+// Esta función mapea las filas del CSV y las convierte a un evento tal y como espera Meta
 function mapRowToEvent(row) {
 
     // 1) Checkout_time: convertir la fecha de la compra a timestamp unix (segundos)
@@ -91,22 +122,34 @@ function mapRowToEvent(row) {
 
     if (row.email) {
         const emHash = sha256(row.email);
-        if (emHash) userData.email = [emHash];
+        if (emHash) userData.em = [emHash];
     }
 
     if (row.phone) {
         const phHash = hashPhone(row.phone);
-        if (phHash) userData.phone = [phHash];
+        if (phHash) userData.ph = [phHash];
     }
 
+    // Madid (id de anunciante en celulares) no necesita hash
     if (row.madid) {
-        const maHash = sha256(row.madid);
-        if (maHash) userData.madid = [maHash];
+        userData.madid = row.madid;
     }
 
-    if (row.Name) {
-        const naHash = sha256(row.Name);
-        if (naHash) userData.name = [naHash];
+    /*
+        La columna "Name" del CSV viene dada como Nombre y Apellido juntos. 
+        Tenemos que pasarlo por el helper splitName() para obtener nombre y apellido por separado y pasar los parámetros que espera Meta "fn" y "ln".
+    */
+    const fullName = row['Name'];
+    const { firstName, lastName } = splitName(fullName);
+
+    if (firstName) {
+        const fnHash = sha256(firstName);
+        if (fnHash) userData.fn = [fnHash];
+    }
+
+    if (lastName) {
+        const lnHash = sha256(lastName);
+        if (lnHash) userData.ln = [lnHash];
     }
 
     /*
@@ -116,7 +159,7 @@ function mapRowToEvent(row) {
     const zipCode = row['zip code'];
     if (zipCode) {
         const ziHash = sha256(zipCode);
-        if (ziHash) userData.zipCode = [ziHash];
+        if (ziHash) userData.zp = [ziHash];
     }
 
     if (row.country) {
@@ -126,12 +169,7 @@ function mapRowToEvent(row) {
 
     if (row.gender) {
         const geHash = sha256(row.gender);
-        if (geHash) userData.gender = [geHash];
-    }
-
-    if (row.action) {
-        const acHash = sha256(row.action);
-        if (acHash) userData.action = [acHash];
+        if (geHash) userData.ge = [geHash];
     }
 
     // 3) custom_data con valor de la conversión (Price)
@@ -152,6 +190,14 @@ function mapRowToEvent(row) {
         customData.currency = 'USD';
     } else {
         customData.currency = 'EUR';
+    }
+
+    /*
+        No sé qué hacer con el valor de "action" del CSV.
+        Por ahora lo he pasado como parte del objeto CustomData.
+    */
+    if (row.action) {
+        customData.action = row.action;
     }
 
     // 4) evento final que pasaremos a Meta
