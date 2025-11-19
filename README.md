@@ -45,6 +45,7 @@ In order for us to review the tool, please send us a repository link from any re
 - csv-parse (converts CSV into JS objects)
 - dotenv (read the .env file)
 - crypto (encrypts data)
+- fs (file system)
 
 /--------------------------------------------
 

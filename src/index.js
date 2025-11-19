@@ -10,25 +10,30 @@ require('dotenv').config();
 // Axios es el "fetch" de Node.js
 const axios = require('axios');
 
+// Requiere fichero local "file system"
+const fs = require('fs');
+
 // Requerimos la librería csv-parse para parsear el CSV a objetos
 const { parse } = require('csv-parse/sync');
-
-// Almacenamos la URL del CSV, si no llega, mandamos error
-const { CSV_URL } = process.env;
-
-if (!CSV_URL) {
-    console.error('Falta CSV_URL en el .env');
-    process.exit(1);
-}
 
 // Meta nos pide que encriptemos la info del cliente. Usamos crypto
 const crypto = require('crypto');
 
-const { META_PIXEL_ID, META_ACCESS_TOKEN, GRAPH_API_VERSION = 'v21.0' } = process.env;
+// Recibimos todos los datos para pasar a la URL de envío
+const { CSV_URL, CSV_FILE_PATH, META_PIXEL_ID, META_ACCESS_TOKEN, GRAPH_API_VERSION = 'v21.0' } = process.env;
+
+
+// Consoles de error por si falta algún dato
+if (!CSV_URL) {
+    console.error('CUIDADO ----> Falta CSV_URL en el .env');
+}
+
+if (!CSV_FILE_PATH) {
+    console.error('CUIDADO ----> Falta CSV_FILE_PATH en el .env');
+}
 
 if (!META_PIXEL_ID || !META_ACCESS_TOKEN) {
-    console.error('Faltan META_PIXEL_ID o META_ACCESS_TOKEN en el doc .env');
-    process.exit(1);
+    console.error('CUIDADO ----> Faltan META_PIXEL_ID o META_ACCESS_TOKEN en el doc .env');
 }
 
 //--------3
@@ -125,6 +130,24 @@ async function sendEvents(eventsBatch) {
     console.log('Respuesta de Meta:');
     console.log('Status:', response.status);
     console.log('Body:', JSON.stringify(response.data, null, 2));
+}
+
+// Decide si leer el CSV de forma remota o local
+async function getCsvText() {
+    if (CSV_FILE_PATH) {
+        // ... desde fichero local
+        console.log('Leyendo CSV local desde:', CSV_FILE_PATH);
+        return fs.promises.readFile(CSV_FILE_PATH, 'utf8');
+    }
+
+    if (CSV_URL) {
+        // ... desde URL remota
+        console.log('Descargando CSV desde URL:', CSV_URL);
+        const response = await axios.get(CSV_URL);
+        return response.data;
+    }
+
+    throw new Error('No se ha definido ni CSV_FILE_PATH ni CSV_URL en el documento .env');
 }
 
 
@@ -249,9 +272,8 @@ async function main() {
     try {
 
         // Descarga CSV desde la URL
-        console.log('Descargando CSV desde:', CSV_URL);
-        const response = await axios.get(CSV_URL);
-        const csvText = response.data;
+        console.log('-------------');
+        const csvText = await getCsvText();
 
         // Parsea CSV a objetos JS
         const records = parse(csvText, {
@@ -263,20 +285,16 @@ async function main() {
         // ¿Cuántas filas contiene el CSV aparte de la primera fila?
         console.log(`Filas leídas: ${records.length}`);
 
-        // Mostramos un ejemplo parseado de la primera fila como objeto
-        console.log('Ejemplo de la primera fila como objeto:');
-        console.log(records[0]);
-
         // ¿Cuáles son los nombres de las columnas (primera fila o fila 0)
-        console.log('Nombres de las columnas:');
+        console.log('Nombres de las columnas del CSV:');
         console.log(Object.keys(records[0]));
 
         const firstRow = records[0];
-        console.log('Primera fila del CSV:');
+        console.log('Ejemplo de la primera fila del CSV parseada como objeto:');
         console.log(firstRow);
 
         const firstEvent = mapRowToEvent(firstRow);
-        console.log('Evento generado a partir de la primera fila:');
+        console.log('Ejemplo de evento generado a partir de la primera fila:');
         console.dir(firstEvent, { depth: null });
 
         ////////////////////////////
@@ -287,13 +305,12 @@ async function main() {
             .filter((e) => e !== null);
 
         console.log(`Eventos generados: ${events.length}`);
-        // De momento, probamos solo con los primeros 10
-        const testBatch = events.slice(0, 10);
-        console.log(`Enviando ${testBatch.length} eventos de prueba a Meta...`);
+        const dataBatch = events.slice(0, 2000);
+        console.log(`Enviando ${dataBatch.length} eventos a Meta...`);
 
-        await sendEvents(testBatch);
+        await sendEvents(dataBatch);
 
-        console.log('Hecho.');
+        console.log('¡FINALIZADO!');
 
 
     } catch (err) {
