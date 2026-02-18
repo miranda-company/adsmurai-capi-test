@@ -15,12 +15,9 @@ The goal of this tool is to pull data from an CSV file, format the data to meet 
 
 /--------------------------------------------
 
-## About the test
+## About
 
-**Test instructions**
-https://docs.google.com/document/d/1-8kk8EEcaxqnCitjWEcZfr04H2e1CfqYTAKc-S6WEqU/edit?tab=t.0
-
-**Test objectives**
+**Objectives**
 The goal is to develop a tool to read the offline conversions from this file (CSV), format them to meet Meta requirements, and upload them to their Meta pixel. 
 
 So, we expect from this test a tool that:
