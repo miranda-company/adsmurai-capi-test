@@ -1,4 +1,4 @@
-# Adsmurai CApi Test
+# Adsmurai CApi Tool
 This repo contains the CAPI tool for Adsmurai.
 
 The goal of this tool is to pull data from an CSV file, format the data to meet META requirements and push the data into Meta obtaining a 200 response code.
